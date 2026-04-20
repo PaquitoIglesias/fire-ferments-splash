@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fire Ferments — Our Batches</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--y:#E8FF00;--black:#0A0A0A;--dark:#111;--mid:#1A1A1A;--border:#2A2A2A;--gray:#555;--muted:#888;--white:#fff}
+body{background:var(--black);color:var(--white);font-family:'DM Mono',monospace;min-height:100vh}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.12em;color:var(--y)}
+.tagline{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+.filter-bar{display:flex;padding:16px 20px;border-bottom:1px solid var(--border)}
+.filter-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:8px 16px;cursor:pointer;transition:all .15s}
+.filter-btn:first-child{border-radius:3px 0 0 3px}
+.filter-btn:last-child{border-radius:0 3px 3px 0;border-left:none}
+.filter-btn.active{background:var(--y);color:var(--black);border-color:var(--y);font-weight:500}
+
+.grid-wrap{padding:20px}
+.batch-count{font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:500px){.grid{grid-template-columns:repeat(2,1fr)}}
+
+.card{background:var(--mid);border:1px solid var(--border);padding:14px 12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative;user-select:none}
+.card:hover{border-color:var(--y);background:#1f1f1f}
+.card.archived{opacity:.4}
+.card.archived:hover{border-color:var(--gray);background:var(--mid)}
+.card-status{display:flex;align-items:center;gap:5px;margin-bottom:10px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--y);flex-shrink:0}
+.card.archived .status-dot{background:var(--gray)}
+.status-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.card-name{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1.05;color:var(--white);letter-spacing:.04em}
+.card.archived .card-name{color:var(--muted)}
+.card-type{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.card-arrow{position:absolute;bottom:10px;right:10px;font-size:12px;color:var(--border);transition:color .15s}
+.card:hover .card-arrow{color:var(--y)}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:flex-end;justify-content:center}
+.modal-backdrop.open{display:flex;animation:bIn .2s ease}
+@keyframes bIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--dark);border:1px solid var(--border);border-bottom:none;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:sUp .25s ease;border-radius:12px 12px 0 0}
+@keyframes sUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.modal-header{padding:16px 20px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.modal-status{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.m-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:.95;letter-spacing:.03em;color:var(--white)}
+.modal-close{background:var(--mid);border:1px solid var(--border);color:var(--muted);font-size:14px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px}
+.modal-close:hover{color:var(--white);border-color:var(--gray)}
+.modal-body{padding:20px}
+.msec{margin-bottom:24px}
+.mlabel{font-size:9px;letter-spacing:.25em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:block}
+.benefit-row{display:flex;gap:10px;margin-bottom:8px;font-size:12px;color:#ccc;line-height:1.5}
+.benefit-row::before{content:'—';color:var(--y);flex-shrink:0}
+.ing-list{display:flex;flex-wrap:wrap;gap:6px}
+.ing-tag{background:var(--mid);border:1px solid var(--border);font-size:10px;letter-spacing:.08em;color:var(--white);padding:4px 10px;border-radius:2px}
+.how-row{display:grid;grid-template-columns:28px 1fr;gap:12px;margin-bottom:14px;align-items:start}
+.how-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--y);line-height:1}
+.how-text{font-size:12px;color:#ccc;line-height:1.6;padding-top:2px}
+.meta-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+.meta-row:last-child{border-bottom:none}
+.meta-key{color:var(--muted)}
+.meta-val{color:var(--white)}
+.archived-notice{background:#1a1a1a;border:1px solid var(--border);padding:14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:20px;font-style:italic}
+.allergy-box{background:rgba(232,255,0,.04);border:1px solid rgba(232,255,0,.15);padding:14px;font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+
+.storage-box{background:var(--mid);border:1px solid var(--border);padding:14px;font-size:12px;color:#ccc;line-height:1.6}
+
+.loading{grid-column:1/-1;text-align:center;padding:60px 20px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.loading-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--y);animation:ldot 1s ease infinite;margin-right:8px;vertical-align:middle}
+@keyframes ldot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.5)}}
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;font-size:11px;color:var(--muted);letter-spacing:.1em}
+
+footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border);margin-top:20px}
+.footer-brand{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--y);letter-spacing:.15em;display:block;margin-bottom:6px}
+.footer-tag{font-size:10px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+      <ellipse cx="20" cy="18" rx="13" ry="13" fill="#E8FF00"/>
+      <ellipse cx="14.5" cy="17" rx="4" ry="4.5" fill="#0A0A0A"/>
+      <ellipse cx="25.5" cy="17" rx="4" ry="4.5" fill="#0A0A0A"/>
+      <rect x="16" y="26" width="3" height="5" rx="1" fill="#0A0A0A"/>
+      <rect x="21" y="26" width="3" height="5" rx="1" fill="#0A0A0A"/>
+      <rect x="13" y="27" width="3" height="4" rx="1" fill="#0A0A0A"/>
+      <rect x="24" y="27" width="3" height="4" rx="1" fill="#0A0A0A"/>
+      <rect x="11" y="22" width="18" height="8" rx="2" fill="#E8FF00"/>
+    </svg>
+    <span class="brand">Fire Ferments</span>
+  </div>
+  <span class="tagline">Madrid</span>
+</header>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+  <button class="filter-btn" onclick="setFilter('archived',this)">Archived</button>
+</div>
+
+<div class="grid-wrap">
+  <div class="batch-count" id="batch-count"></div>
+  <div class="grid" id="grid">
+    <div class="loading"><span class="loading-dot"></span>Loading batches…</div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-brand">Fire Ferments</span>
+  <div class="footer-tag">Life's too short for dead food</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="backdrop" onclick="outsideClose(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-status">
+          <div class="m-dot" id="m-dot"></div>
+          <span class="status-label" id="m-slabel"></span>
+        </div>
+        <div class="modal-title" id="m-title"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+const SB_URL='https://qyjvesjczpjhyehcerkw.supabase.co/rest/v1';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5anZlc2pjenBqaHllaGNlcmt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjQ2ODYsImV4cCI6MjA5MTc0MDY4Nn0.9GwwcL8bjN3LtDtxwDOciroiJAxybfipN8SE_sb8N5U';
+const HDR={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmtD=d=>{if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});};
+
+let allBatches=[];
+let currentFilter='all';
+
+async function loadData(){
+  try{
+    const [sr,br]=await Promise.all([
+      fetch(SB_URL+'/splash_content?select=*',{headers:HDR}),
+      fetch(SB_URL+'/batches?select=id,name,status,ready_date,ingredients',{headers:HDR})
+    ]);
+    const splash=await sr.json();
+    const batches=await br.json();
+
+    const batchMap={};
+    (batches||[]).forEach(b=>{batchMap[b.id]=b;});
+
+    allBatches=(splash||[]).map(s=>{
+      const b=batchMap[s.batch_id]||{};
+      return{
+        splashId:s.id,
+        batchId:s.batch_id,
+        name:b.name||'Unknown Batch',
+        status:s.splash_active?'active':'archived',
+        productType:s.product_type||'ferment',
+        benefits:s.benefits||[],
+        howToSteps:s.how_to_steps||[],
+        shelfLife:s.shelf_life||'',
+        allergens:s.allergens||'',
+        ingredients:(b.ingredients||[]).map(i=>i.item).filter(Boolean),
+        bottled:b.ready_date||null
+      };
+    }).sort((a,b)=>{
+      if(a.status==='active'&&b.status!=='active')return -1;
+      if(a.status!=='active'&&b.status==='active')return 1;
+      return 0;
+    });
+
+    renderGrid();
+  }catch(err){
+    console.error(err);
+    document.getElementById('grid').innerHTML='<div class="empty-state">Could not load batches. Try again later.</div>';
+  }
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function visibleBatches(){
+  return allBatches.filter(b=>currentFilter==='all'||b.status===currentFilter);
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  const countEl=document.getElementById('batch-count');
+  const list=visibleBatches();
+  countEl.textContent=list.length+' batch'+(list.length!==1?'es':'');
+
+  if(!list.length){
+    grid.innerHTML='<div class="empty-state">No batches here yet.</div>';
+    return;
+  }
+
+  grid.innerHTML=list.map((b,i)=>`
+    <div class="card${b.status==='archived'?' archived':''}" onclick="openModal(${i})">
+      <div class="card-status">
+        <div class="status-dot"></div>
+        <span class="status-label">${b.status==='active'?'Available':'Archived'}</span>
+      </div>
+      <div class="card-name">${esc(b.name)}</div>
+      <div class="card-type">${b.productType==='gut_shot'?'Gut Shot':'Ferment'}</div>
+      <span class="card-arrow">↗</span>
+    </div>
+  `).join('');
+}
+
+function openModal(i){
+  const list=visibleBatches();
+  const b=list[i];
+  if(!b)return;
+
+  const arc=b.status==='archived';
+  const ac=arc?'var(--muted)':'var(--y)';
+
+  document.getElementById('m-dot').style.background=arc?'var(--gray)':'var(--y)';
+  document.getElementById('m-slabel').textContent=arc?'Archived':'Available now';
+  document.getElementById('m-title').textContent=b.name;
+  document.getElementById('m-title').style.color=arc?'var(--muted)':'var(--white)';
+
+  let html='';
+
+  if(arc){
+    html+=`<div class="archived-notice">This batch is no longer in production. It may return in a future run.</div>`;
+  }
+
+  if(b.benefits&&b.benefits.length){
+    html+=`<div class="msec"><span class="mlabel" style="color:${ac}">Why it works</span>`;
+    html+=b.benefits.map(x=>`<div class="benefit-row">${esc(x)}</div>`).join('');
+    html+=`</div>`;
+  }
+
+  if(b.howToSteps&&b.howToSteps.length){
+    const verb=b.productType==='gut_shot'?'How to drink it':'How to eat it';
+    html+=`<div class="msec"><span class="mlabel" style="color:${ac}">${verb}</span>`;
+    html+=b.howToSteps.map((s,idx)=>`
+      <div class="how-row">
+        <div class="how-num" style="color:${ac}">${String(idx+1).padStart(2,'0')}</div>
+        <div class="how-text">${esc(s)}</div>
+      </div>`).join('');
+    html+=`</div>`;
+  }
+
+  if(b.shelfLife){
+    html+=`<div class="msec"><span class="mlabel" style="color:${ac}">Storage</span>
+      <div class="storage-box">${esc(b.shelfLife)}</div>
+    </div>`;
+  }
+
+  if(b.ingredients&&b.ingredients.length){
+    html+=`<div class="msec"><span class="mlabel" style="color:${ac}">Ingredients</span>
+      <div class="ing-list">${b.ingredients.map(x=>`<span class="ing-tag">${esc(x)}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  html+=`<div class="msec"><span class="mlabel" style="color:${ac}">Batch</span>`;
+  if(b.bottled)html+=`<div class="meta-row"><span class="meta-key">Bottled on</span><span class="meta-val">${fmtD(b.bottled)}</span></div>`;
+  html+=`<div class="meta-row"><span class="meta-key">Type</span><span class="meta-val">${b.productType==='gut_shot'?'Gut Shot':'Ferment'}</span></div>`;
+  html+=`</div>`;
+
+  if(b.allergens){
+    html+=`<div class="allergy-box">
+      <div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:${ac};margin-bottom:6px">Allergens</div>
+      ${esc(b.allergens)}
+    </div>`;
+  }
+
+  document.getElementById('m-body').innerHTML=html;
+  document.getElementById('backdrop').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function outsideClose(e){
+  if(e.target===document.getElementById('backdrop'))closeModal();
+}
+function closeModal(){
+  document.getElementById('backdrop').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+loadData();
+</script>
+</body>
+</html>
